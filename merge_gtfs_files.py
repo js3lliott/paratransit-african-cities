@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import gtfs_kit as gk
+from pathlib import Path
 
 def load_gtfs_files(gtfs_folder_path):
     """Load GTFS feed from a folder containing unzipped GTFS text files."""
@@ -39,10 +40,17 @@ gtfs_dirs = [
 ]
 
 # Load GTFS data and create unique identifiers for each feed
-feeds = [create_unique_ids(load_gtfs_files(gtfs_dirs), os.path.basename(gtfs_dirs)) for gtfs_dir in gtfs_dirs]
+# feeds = [create_unique_ids(load_gtfs_files(gtfs_dirs), os.path.basename(gtfs_dir)) for gtfs_dir in gtfs_dirs]
+feeds = []
+for gtfs_dir in gtfs_dirs:
+    feed = load_gtfs_files(gtfs_dir)
+    if feed is not None:
+        city_name = Path(gtfs_dir).name
+        feed_with_ids = create_unique_ids(feed, city_name)
+        feeds.append(feed_with_ids)
 
 # Merge the feeds
 merged_feed = merge_feeds(feeds)
 
 # save the merged feed to a new folder or zip file
-save_merged_feed(merged_feed, './data/processed/merged_gtfs')
+save_merged_feed(merged_feed, './data/processed/merged_gtfs/merged_gtfs.zip')
